@@ -1,7 +1,17 @@
-import IBaseDomain from '../../../Shared/Entities/IBaseDomain';
-import ItemRepPayload from '../Payloads/ItemRepPayload';
+import IBaseDomain from '@shared/Entities/IBaseDomain';
 
-interface IItemDomain extends ItemRepPayload, IBaseDomain
-{}
+import IItemDetailDomain from './IItemDetailDomain';
+
+interface IItemDomain extends IBaseDomain
+{
+  readonly number: string;
+  readonly date: Date;
+  readonly customerName: string;
+  readonly totalAmount: number;
+  readonly details: IItemDetailDomain[];
+
+  hasDetails(): boolean;
+  getDetailCount(): number;
+}
 
 export default IItemDomain;

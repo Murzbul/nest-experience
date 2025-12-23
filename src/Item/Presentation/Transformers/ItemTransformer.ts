@@ -10,8 +10,11 @@ class ItemTransformer extends Transformer<IItemDomain, IItemTransformer>
     {
         return {
             id: item.id,
-            name: item.name,
-            description: item.description,
+            number: item.number,
+            date: item.date instanceof Date ? item.date.toISOString() : new Date(item.date).toISOString(),
+            customerName: item.customerName,
+            totalAmount: item.totalAmount,
+            detailCount: item.getDetailCount(),
             ...this.getTimestamp(item)
         };
     }

@@ -2,21 +2,23 @@ import { MapCriteria } from '@shared/Criteria/MapCriteria';
 
 class ItemSort extends MapCriteria
 {
-    static readonly NAME: string = 'name';
-    static readonly DESCRIPTION: string = 'description';
+    static readonly CUSTOMER_NAME: string = 'customerName';
+    static readonly NUMBER: string = 'number';
+    static readonly DATE: string = 'date';
 
     getFields(): string[]
     {
         return [
-            ItemSort.NAME,
-            ItemSort.DESCRIPTION
+            ItemSort.CUSTOMER_NAME,
+            ItemSort.NUMBER,
+            ItemSort.DATE
         ];
     }
 
     getDefaults(): Record<string, 'asc' | 'desc'>[]
     {
         return [
-            { [ItemSort.NAME]: 'asc' }
+            { [ItemSort.DATE]: 'desc' }
         ];
     }
 }

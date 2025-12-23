@@ -1,41 +1,48 @@
+import { setupDataSource } from '@config/DataSourceTest';
 import Compression from '@fastify/compress';
 import FastifyMultipart from '@fastify/multipart';
 import { RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ModuleDefinition } from '@nestjs/core/interfaces/module-definition.interface';
 import { CqrsModule } from '@nestjs/cqrs';
-import { MongooseModule } from '@nestjs/mongoose';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvConfig, EnvSchema } from '@src/Config/EnvConfig';
 import Qs from 'fastify-qs';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import request from 'supertest';
+import { ClsModule } from 'nestjs-cls';
+import { agent as supertestAgent } from 'supertest';
 import TestAgent from 'supertest/lib/agent';
+import { DataSource } from 'typeorm';
 
-export type TestAgentType = { agent: TestAgent, app: NestFastifyApplication, mongoServer: MongoMemoryServer };
+export type TestAgentType = { agent: TestAgent, app: NestFastifyApplication, ds: DataSource };
 
 export async function getTestAgent(...modules: ModuleDefinition[]): Promise<TestAgentType>
 {
-  let mongoServer: MongoMemoryServer;
-
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [
-      ConfigModule.forRoot({
+      await ConfigModule.forRoot({
         load: [EnvConfig],
         validationSchema: EnvSchema,
         isGlobal: true
       }),
+      ClsModule.forRoot({
+        global: true,
+        middleware: { mount: true }
+      }),
       CqrsModule.forRoot(),
-      MongooseModule.forRootAsync({
+      TypeOrmModule.forRootAsync({
         useFactory: async() =>
         {
-          mongoServer = await MongoMemoryServer.create();
-          const mongoUri = mongoServer.getUri();
           return {
-            uri: mongoUri
+            synchronize: false
           };
-        }
+        },
+        dataSourceFactory: async() =>
+        {
+          return await setupDataSource();
+        },
+        inject: []
       }),
       ...modules
     ]
@@ -46,16 +53,18 @@ export async function getTestAgent(...modules: ModuleDefinition[]): Promise<Test
     exclude: [{ path: '/', method: RequestMethod.GET }]
   });
 
-  await app.register(Compression);
-  await app.register(Qs);
-  await app.register(FastifyMultipart);
+  const ds = app.get(DataSource);
+
+  await app.register(Compression as any);
+  await app.register(Qs as any);
+  await app.register(FastifyMultipart as any);
 
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
 
   return {
-    agent: request(app.getHttpServer()),
+    agent: supertestAgent(app.getHttpServer()),
     app,
-    mongoServer
+    ds
   };
 }

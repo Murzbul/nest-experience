@@ -1,27 +1,54 @@
-import { randomUUID } from 'crypto';
+import { EntitySchema } from 'typeorm';
 
-import * as mongoose from 'mongoose';
-
-import IItemDomain from '../../Domain/Entities/IItemDomain';
-import Item from '../../Domain/Entities/Item';
-
-const { Schema } = mongoose;
-export type ItemMongooseDocument = Document & IItemDomain;
-
-const ItemSchema = new Schema<IItemDomain & { _id: string }>({
-    _id: { type: Schema.Types.String, default: randomUUID },
-    name: { type: Schema.Types.String, required: true },
-    description: { type: Schema.Types.Number, required: true }
-}, { timestamps: true });
-
-ItemSchema.loadClass(Item);
-
-ItemSchema.virtual('id').get(function()
+export class ItemEntity
 {
-  return this._id;
+  id: string;
+  number: string;
+  date: Date;
+  customerName: string;
+  totalAmount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const ItemSchema = new EntitySchema<ItemEntity>({
+  name: 'ItemEntity',
+  tableName: 'item_headers',
+  target: ItemEntity,
+  columns: {
+    id: {
+      type: 'uuid',
+      primary: true
+    },
+    number: {
+      type: 'varchar',
+      length: 50,
+      unique: true
+    },
+    date: {
+      type: 'date'
+    },
+    customerName: {
+      name: 'customer_name',
+      type: 'varchar',
+      length: 255
+    },
+    totalAmount: {
+      name: 'total_amount',
+      type: 'decimal',
+      precision: 10,
+      scale: 2,
+      default: 0
+    },
+    createdAt: {
+      name: 'created_at',
+      type: 'timestamp',
+      createDate: true
+    },
+    updatedAt: {
+      name: 'updated_at',
+      type: 'timestamp',
+      updateDate: true
+    }
+  }
 });
-
-ItemSchema.set('toJSON', { virtuals: true });
-ItemSchema.set('toObject', { virtuals: true });
-
-export default ItemSchema;

@@ -46,7 +46,7 @@ export abstract class MapCriteria implements IMapCriteria
         });
     }
 
-    private setValue(key: string, value: number | boolean | string)
+    protected setValue(key: string, value: number | boolean | string)
     {
         if (value !== undefined && value !== null)
         {

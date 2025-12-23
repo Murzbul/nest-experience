@@ -1,25 +1,36 @@
 import { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { SharedModule } from '@shared/SharedModule';
 import { AppModule } from '@src/App/AppModule';
-import { getTestAgent } from '@src/Config/TestConfig';
+import { getTestAgent, TestAgentType } from '@src/Config/TestConfig';
 import TestAgent from 'supertest/lib/agent';
-import { expect } from 'vitest';
+import { DataSource } from 'typeorm';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 describe('AppController (e2e)', () =>
 {
   let app: NestFastifyApplication;
   let agent: TestAgent;
+  let ds: DataSource;
 
-  beforeEach(async() =>
+  beforeAll(async() =>
   {
-    const config = await getTestAgent(SharedModule, AppModule);
+    const config: TestAgentType = await getTestAgent(SharedModule, AppModule);
     app = config.app;
     agent = config.agent;
+    ds = config.ds;
   });
 
   afterAll(async() =>
   {
-    await app.close();
+    if (app)
+    {
+      await app.close();
+    }
+
+    if (ds?.isInitialized)
+    {
+      await ds.destroy();
+    }
   });
 
   test('/ (GET)', async() =>

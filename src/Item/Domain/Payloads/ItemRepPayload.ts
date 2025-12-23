@@ -1,8 +1,11 @@
+import ItemDetailRepPayload from './ItemDetailRepPayload';
 
 interface ItemRepPayload
 {
-    name: string;
-    description: number;
+  number: string;
+  date: Date | string;
+  customerName: string;
+  details: ItemDetailRepPayload[];
 }
 
 export default ItemRepPayload;

@@ -2,8 +2,11 @@
 interface IItemTransformer
 {
     id: string;
-    name: string;
-    description: number;
+    number: string;
+    date: string;
+    customerName: string;
+    totalAmount: number;
+    detailCount: number;
     createdAt: number;
     updatedAt: number;
 }

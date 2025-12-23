@@ -1,13 +1,16 @@
+import { randomUUID } from 'crypto';
+
 import { AppController } from '@app/Presentation/Controllers/AppController';
 import { AuthModule } from '@auth/AuthModule';
 import { EnvConfig, EnvSchema } from '@config/EnvConfig';
-import { FileModule } from '@file/FileModule';
+import TypeormConfig from '@config/TypeormConfig';
 import { ItemModule } from '@item/ItemModule';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedModule } from '@shared/SharedModule';
+import { ClsModule } from 'nestjs-cls';
 
 @Module({
   imports: [
@@ -17,16 +20,19 @@ import { SharedModule } from '@shared/SharedModule';
       isGlobal: true
     }),
     CqrsModule.forRoot(),
-    MongooseModule.forRootAsync({
-      imports: [],
-      useFactory: (config: ConfigService) => ({
-        uri: config.get('DB_URI', 'mongodb://experience:experience@localhost:27018/experience')
-      }),
-      inject: [ConfigService]
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+        generateId: true,
+        idGenerator: () => randomUUID()
+      }
+    }),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeormConfig
     }),
     AuthModule,
     ItemModule,
-    FileModule,
     SharedModule
   ],
   controllers: [AppController]

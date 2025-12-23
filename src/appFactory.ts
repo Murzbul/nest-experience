@@ -18,9 +18,9 @@ class App
 
   async initMiddleware(): Promise<void>
   {
-    await this.app.register(Compression);
-    await this.app.register(Qs);
-    await this.app.register(FastifyMultipart);
+    await this.app.register(Compression as any);
+    await this.app.register(Qs as any);
+    await this.app.register(FastifyMultipart as any);
   }
 
   useGlobalFilters()
